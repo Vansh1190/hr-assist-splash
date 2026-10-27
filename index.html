@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>HR Assist — Splash &amp; Onboarding</title>
+<meta name="description" content="Maruti Suzuki HR Assist splash / onboarding experience, built from the MSIL Enhancement Track design." />
+<meta name="theme-color" content="#5F7CEB" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235f7ceb'/%3E%3Cpath d='M9 21.5 20 10h3.5L12.5 21.5z M9 12h6.5v2.6H9z M16.5 17.4H23V20h-6.5z' fill='white'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="./css/onboarding.css" />
+</head>
+<body>
+  <!--
+    Device stage. The design canvas is 440 x 996 (Figma node 7136:413 "Play here").
+    Everything inside is laid out in design units: 1 design px = var(--u), measured in JS.
+  -->
+  <main class="qnx-shell">
+    <div class="qnx-device" id="stage" data-tag="splash_root" data-stage="boot"></div>
+  </main>
+
+  <script type="module">
+    import { mountOnboarding } from './js/onboarding.js';
+    import { mountSignIn } from './js/signin.js';
+
+    const stage = document.getElementById('stage');
+    const params = new URLSearchParams(location.search);
+    const at = params.get('at');   // ?at=bloom|logo|carousel|card|story|hold — QA entry point
+
+    const splash = mountOnboarding(stage, {
+      autoplay: !at,
+      onDone: () => mountSignIn(stage, { onBack: () => location.reload() }),
+    });
+    if (at) splash.jumpTo(at);
+    window.QNX = { splash, mountSignIn };
+  </script>
+</body>
+</html>

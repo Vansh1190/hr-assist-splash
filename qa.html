@@ -1,0 +1,21 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/onboarding.css"></head><body>
+<main class="qnx-shell"><div class="qnx-device" id="stage"></div></main>
+<script type="module">
+import { mountOnboarding } from './js/onboarding.js';
+import { mountSignIn } from './js/signin.js';
+const stage=document.getElementById('stage');
+const q=new URLSearchParams(location.search);
+if(q.get('view')==='signin'){ mountSignIn(stage,{}); }
+else{
+  const s=mountOnboarding(stage,{autoplay:false});
+  s.jumpTo(q.get('at')||'hold');
+  const dw=stage.querySelector('.qnx-dialwrap');
+  if(q.get('hold')==='snap'){ dw.dataset.holding='1'; dw.style.setProperty('--p', q.get('p')||'0.62'); }
+  else if(q.get('engine')){ dw.dataset.engine='1'; dw.style.setProperty('--p','1'); stage.dataset.stage='engine'; }
+  else if(q.get('hold')){ setTimeout(()=>{ stage.querySelector('.qnx-dial').dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,cancelable:true})); },50); }
+
+}
+</script></body></html>

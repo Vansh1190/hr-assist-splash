@@ -1,0 +1,917 @@
+/* ============================================================================
+   HR Assist — splash / onboarding
+   Source of truth: Figma "MSIL Enhancement Track" › HR Assist ›
+   "Splash -- Introduction screens (Current)" (node 7236:571).
+   Canvas 440 x 996. 1 design px === var(--u) (measured by onboarding.js).
+   ========================================================================== */
+
+/* Animated custom properties (progressive enhancement; values still apply
+   as plain jumps where @property is unsupported). */
+@property --ring-w { syntax: '<length>'; inherits: true; initial-value: 10px; }
+@property --ring-a { syntax: '<number>'; inherits: true; initial-value: 0.55; }
+@property --dash-a { syntax: '<number>'; inherits: true; initial-value: 0.13; }
+@property --p      { syntax: '<number>'; inherits: true; initial-value: 0; }
+
+:root {
+  /* ---- palette (sampled from the design) ---- */
+  --sky-top:    #8db6ff;
+  --sky-mid:    #7f9dfa;
+  --sky-deep:   #5f7ceb;
+  --bloom-mid:  #c3d4ff;
+  --navy:       #171c8f;
+  --azure:      #6b86ff;
+  --light-blue: #58a6ff;
+  --ice:        #80ceff;
+  --ring-1:     #b4c9ff;
+
+  --ink:        #1c1c1e;
+  --ink-soft:   #3c3c43;
+  --frame-bg:   #0b0c14;
+
+  --card-ring:  rgba(13, 17, 102, 0.16);
+
+  /* ---- type ---- */
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* ---- motion (verbatim from the design captions) ---- */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-settle: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-cine:   cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ---- stage ---- */
+  --u: 1px;
+  --w: 440;
+  --h: 996;
+
+  --ring-spin: 7s;
+  --power-glow: 0 0 0 rgba(88, 166, 255, 0);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #05060a;
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+.qnx-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(0px, 2vmin, 24px);
+  background:
+    radial-gradient(120% 80% at 50% 0%, #16204a 0%, #0a0d1c 55%, #05060a 100%);
+}
+
+/* The device stage: fills the viewport on phones, becomes a framed device on
+   larger screens so the 440x996 composition never distorts. */
+.qnx-device {
+  position: relative;
+  width: min(100vw, 440px, calc((100dvh) * 440 / 996));
+  height: min(100dvh, 996px, calc((100vw) * 996 / 440));
+  overflow: hidden;
+  background: var(--frame-bg);
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+@media (min-width: 700px) {
+  .qnx-device {
+    width: min(440px, calc(92dvh * 440 / 996));
+    height: min(996px, calc(92dvh));
+    border-radius: 46px;
+    box-shadow:
+      0 0 0 10px #0d1020,
+      0 0 0 11px rgba(255, 255, 255, 0.08),
+      0 60px 120px -30px rgba(0, 0, 0, 0.9);
+  }
+}
+
+/* ---------------------------------------------------------------- layers -- */
+
+.qnx-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.6s var(--ease-cine);
+}
+.qnx-layer[data-visible="1"] { opacity: 1; }
+
+
+/* ------------------------------------------------------- 01.1 bloom ------ */
+.qnx-bloom {
+  background: linear-gradient(
+    180deg,
+    var(--sky-top) 0%,
+    var(--sky-mid) 50%,
+    var(--sky-deep) 100%
+  );
+}
+.qnx-bloom__core {
+  position: absolute;
+  left: calc(10 * var(--u));
+  top: calc(190 * var(--u));
+  width: calc(420 * var(--u));
+  height: calc(560 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(255, 255, 255, 0.75) 0%,
+    rgba(180, 201, 255, 0.35) 55%,
+    rgba(180, 201, 255, 0) 100%
+  );
+  filter: blur(calc(40 * var(--u)));
+  transform: scale(0.22);
+  opacity: 0;
+}
+.qnx-device[data-stage="bloom"] .qnx-bloom__core {
+  animation: bloom 0.8s var(--ease-smooth) forwards;
+}
+@keyframes bloom {
+  from { transform: scale(0.22); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+/* --------------------------------------------- 01.2 logo + tagline ------- */
+.qnx-logo-stage {
+  background: radial-gradient(
+    66% 50% at 50% 42%,
+    #ffffff 0%,
+    #ffffff 55%,
+    var(--bloom-mid) 78%,
+    #7d9af2 100%
+  );
+}
+.qnx-logo {
+  position: absolute;
+  left: calc(137 * var(--u));
+  top: calc(276 * var(--u));
+  width: calc(166 * var(--u));
+  height: calc(169 * var(--u));
+  background: url("../assets/logo.webp") center / contain no-repeat;
+  filter: drop-shadow(0 calc(10 * var(--u)) calc(27 * var(--u)) rgba(13, 17, 102, 0.22));
+  transform: scale(1.14);
+  opacity: 0;
+}
+.qnx-device[data-stage="logo"] .qnx-logo,
+.qnx-device[data-stage="carousel"] .qnx-logo {
+  animation: logo-settle 1.25s var(--ease-settle) forwards;
+}
+@keyframes logo-settle {
+  from { transform: scale(1.14); opacity: 0; }
+  40%  { opacity: 1; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.qnx-tagline {
+  position: absolute;
+  left: 0;
+  top: calc(465 * var(--u));
+  width: 100%;
+  text-align: center;
+  font-size: calc(27 * var(--u));
+  line-height: calc(33 * var(--u));
+  font-weight: 600;
+  letter-spacing: -0.2px;
+  background: linear-gradient(
+    100deg,
+    var(--navy) 0%,
+    var(--navy) 38%,
+    var(--azure) 45%,
+    var(--navy) 55%,
+    var(--navy) 100%
+  );
+  background-size: 260% 100%;
+  background-position: 130% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  opacity: 0;
+}
+.qnx-device[data-stage="logo"] .qnx-tagline,
+.qnx-device[data-stage="carousel"] .qnx-tagline {
+  animation: tagline-in 1.15s var(--ease-smooth) 0.45s forwards;
+}
+@keyframes tagline-in {
+  from { opacity: 0; background-position: 130% 0; }
+  35%  { opacity: 1; }
+  to   { opacity: 1; background-position: -30% 0; }
+}
+
+/* ------------------------------------------------- 01.3 carousel --------- */
+.qnx-carousel { background: #ffffff; }
+
+.qnx-carousel__wash {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(300 * var(--u));
+  background: linear-gradient(
+    180deg,
+    rgba(157, 185, 255, 0.95) 0%,
+    rgba(195, 213, 255, 0.55) 45%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.qnx-row {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+.qnx-device[data-stage="carousel"] .qnx-row[data-dir="left"] {
+  animation: row-left 14s ease-in-out infinite alternate;
+}
+.qnx-device[data-stage="carousel"] .qnx-row[data-dir="right"] {
+  animation: row-right 14s ease-in-out infinite alternate;
+}
+@keyframes row-left  { from { transform: translateX(0); }                to { transform: translateX(calc(-56 * var(--u))); } }
+@keyframes row-right { from { transform: translateX(0); }                to { transform: translateX(calc(56 * var(--u))); } }
+
+.qnx-card {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  width: var(--w);
+  height: var(--h);
+  border-radius: calc(20 * var(--u));
+  border: calc(1.2 * var(--u)) solid #fff;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 calc(12 * var(--u)) calc(26 * var(--u)) var(--card-ring);
+  transform: translate3d(var(--fx), var(--fy), 0) rotate(-9deg) scale(0.34);
+  opacity: 0;
+  transition:
+    transform 1.55s var(--ease-settle),
+    opacity 0.9s var(--ease-smooth),
+    left 1.3s var(--ease-cine),
+    top 1.3s var(--ease-cine),
+    width 1.3s var(--ease-cine),
+    height 1.3s var(--ease-cine),
+    border-radius 1.3s var(--ease-cine),
+    border-width 0.6s linear;
+  will-change: transform;
+}
+.qnx-device[data-stage="carousel"] .qnx-card,
+.qnx-device[data-stage="card"] .qnx-card {
+  transform: rotate(-9deg) scale(1);
+  opacity: 1;
+}
+.qnx-card[data-fade="1"] { opacity: 0.42; }
+
+/* the 800-line card is the one that opens (02.1) */
+.qnx-card--hero { z-index: 3; }
+.qnx-device[data-stage="card"] .qnx-card--hero {
+  left: 0;
+  top: 0;
+  width: calc(440 * var(--u));
+  height: calc(996 * var(--u));
+  border-radius: 0;
+  border-width: 0;
+  transform: rotate(0deg) scale(1);
+  opacity: 1;
+  transition-delay: 0s;
+  z-index: 6;
+}
+.qnx-device[data-stage="card"] .qnx-card:not(.qnx-card--hero),
+.qnx-device[data-stage="card"] .qnx-row {
+  opacity: 0;
+  animation: none;
+  transition: opacity 0.52s linear;
+}
+.qnx-device[data-stage="card"] .qnx-carousel__wash,
+.qnx-device[data-stage="card"] .qnx-carousel__fade,
+.qnx-device[data-stage="card"] .qnx-copy--light { opacity: 0; transition: opacity 0.52s linear; }
+
+.qnx-carousel__fade {
+  position: absolute;
+  left: 0;
+  top: calc(428 * var(--u));
+  width: 100%;
+  height: calc(568 * var(--u));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.82) 19%,
+    #fff 31%,
+    #fff 100%
+  );
+}
+
+/* --------------------------------------------------- copy blocks --------- */
+.qnx-copy {
+  position: absolute;
+  left: calc(28 * var(--u));
+  width: calc(384 * var(--u));
+  z-index: 20;
+}
+.qnx-copy--light { top: calc(667 * var(--u)); }
+.qnx-copy--light .qnx-copy__title {
+  color: var(--ink);
+  font-size: calc(27 * var(--u));
+  line-height: calc(33 * var(--u));
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  margin: 0;
+}
+.qnx-copy--light .qnx-copy__body {
+  color: var(--ink-soft);
+  font-size: calc(16.5 * var(--u));
+  line-height: calc(23 * var(--u));
+  font-weight: 400;
+  margin: calc(13 * var(--u)) 0 0;
+  max-width: calc(360 * var(--u));
+}
+.qnx-copy--light .qnx-copy__title,
+.qnx-copy--light .qnx-copy__body {
+  opacity: 0;
+  transform: translateY(calc(14 * var(--u)));
+}
+.qnx-device[data-stage="carousel"] .qnx-copy--light .qnx-copy__title,
+.qnx-device[data-stage="carousel"] .qnx-copy--light .qnx-copy__body {
+  animation: copy-up 0.9s var(--ease-smooth) 1.05s forwards;
+}
+.qnx-device[data-stage="carousel"] .qnx-copy--light .qnx-copy__body { animation-delay: 1.2s; }
+@keyframes copy-up {
+  to { opacity: 1; transform: none; }
+}
+
+.qnx-copy--story {
+  top: calc(102 * var(--u));
+  opacity: 0;
+  transition: opacity 0.6s linear;
+}
+.qnx-device[data-stage="story"] .qnx-copy--story,
+.qnx-device[data-stage="hold"] .qnx-copy--story,
+.qnx-device[data-stage="engine"] .qnx-copy--story,
+.qnx-device[data-stage="launch"] .qnx-copy--story { opacity: 1; }
+.qnx-copy--story .qnx-copy__title {
+  margin: 0;
+  color: #fff;
+  font-size: calc(31 * var(--u));
+  line-height: calc(37 * var(--u));
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  text-shadow: 0 calc(4 * var(--u)) calc(14 * var(--u)) rgba(0, 0, 0, 0.35);
+}
+.qnx-copy--story .qnx-copy__body {
+  margin: calc(14 * var(--u)) 0 0;
+  color: #fff;
+  font-size: calc(20 * var(--u));
+  line-height: calc(28 * var(--u));
+  font-weight: 400;
+  opacity: 0.92;
+  max-width: calc(360 * var(--u));
+  text-shadow: 0 calc(4 * var(--u)) calc(14 * var(--u)) rgba(0, 0, 0, 0.35);
+}
+.qnx-copy.swap .qnx-copy__title,
+.qnx-copy.swap .qnx-copy__body {
+  opacity: 0;
+  transform: translateY(calc(-10 * var(--u)));
+  transition: opacity 0.22s linear, transform 0.22s var(--ease-smooth);
+}
+.qnx-copy:not(.swap) .qnx-copy__title,
+.qnx-copy:not(.swap) .qnx-copy__body {
+  animation: copy-in 0.5s var(--ease-smooth);
+}
+@keyframes copy-in {
+  from { opacity: 0; transform: translateY(calc(10 * var(--u))); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ------------------------------------------------ 02.2 → 03 story -------- */
+.qnx-photo {
+  position: absolute;
+  width: 124.3%;
+  height: 119.6%;
+  left: -12.15%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transform: translate3d(0, var(--py, 0), 0) scale(1.04);
+  transition: opacity 0.9s var(--ease-cine), transform 0.9s var(--ease-cine);
+  will-change: opacity, transform;
+}
+.qnx-photo[data-active="1"] {
+  opacity: 1;
+  transform: translate3d(0, var(--py, 0), 0) scale(1);
+  animation: drift 9s ease-in-out infinite alternate;
+}
+@keyframes drift {
+  from { transform: translate3d(calc(-4 * var(--u)), var(--py, 0px), 0) scale(1); }
+  to   { transform: translate3d(calc(4 * var(--u)), calc(var(--py, 0px) - 10 * var(--u)), 0) scale(1.03); }
+}
+/* photo sits "just above the dash" once the cockpit lands (03.1 caption) */
+.qnx-device[data-stage="story"] .qnx-photo[data-active="1"],
+.qnx-device[data-stage="hold"] .qnx-photo[data-active="1"],
+.qnx-device[data-stage="engine"] .qnx-photo[data-active="1"] {
+  --py: var(--py-landed, -20%);
+}
+
+.qnx-shade {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: calc(300 * var(--u));
+  background: linear-gradient(
+    180deg,
+    rgba(6, 8, 20, 0.58) 0%,
+    rgba(6, 8, 20, 0.3) 55%,
+    rgba(6, 8, 20, 0) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.6s linear;
+  z-index: 15;
+}
+.qnx-device[data-stage="story"] .qnx-shade,
+.qnx-device[data-stage="hold"] .qnx-shade,
+.qnx-device[data-stage="engine"] .qnx-shade,
+.qnx-device[data-stage="launch"] .qnx-shade { opacity: 1; }
+
+/* cockpit: 732 x 1594 design rect at (-292, -113) on a 440 x 996 canvas */
+.qnx-cockpit {
+  position: absolute;
+  left: -66.36%;
+  top: -11.34%;
+  width: 166.36%;
+  height: 160.04%;
+  background: url("../assets/cockpit.webp") top left / 100% 100% no-repeat;
+  opacity: 0;
+  transform: translateY(calc(26 * var(--u)));
+  transition: opacity 0.7s var(--ease-cine), transform 0.7s var(--ease-cine);
+  z-index: 25;
+}
+.qnx-device[data-stage="story"] .qnx-cockpit,
+.qnx-device[data-stage="hold"] .qnx-cockpit,
+.qnx-device[data-stage="engine"] .qnx-cockpit,
+.qnx-device[data-stage="launch"] .qnx-cockpit {
+  opacity: 1;
+  transform: none;
+}
+
+/* the cockpit "goes dark for the start step" (04.1) */
+.qnx-void {
+  position: absolute;
+  left: 0;
+  top: calc(528 * var(--u));
+  width: 100%;
+  height: calc(468 * var(--u));
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.78) 20%,
+    rgba(0, 0, 0, 0.9) 45%,
+    rgba(0, 0, 0, 0.96) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-cine);
+  z-index: 26;
+}
+.qnx-device[data-stage="hold"] .qnx-void,
+.qnx-device[data-stage="engine"] .qnx-void,
+.qnx-device[data-stage="launch"] .qnx-void { opacity: 1; }
+
+/* ----------------------------------------------------- start dial -------- */
+.qnx-dialwrap {
+  position: absolute;
+  left: calc(55 * var(--u));
+  top: calc(622 * var(--u));
+  width: calc(330 * var(--u));
+  height: calc(330 * var(--u));
+  z-index: 40;
+  opacity: 0;
+  transform: translateY(calc(26 * var(--u)));
+  transition: opacity 0.7s var(--ease-cine), transform 0.7s var(--ease-cine);
+  pointer-events: none;
+}
+.qnx-device[data-stage="story"] .qnx-dialwrap,
+.qnx-device[data-stage="hold"] .qnx-dialwrap,
+.qnx-device[data-stage="engine"] .qnx-dialwrap {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.qnx-dial {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.qnx-dial:focus-visible { outline: none; }
+.qnx-dial:focus-visible .qnx-dial__glass { box-shadow: 0 0 0 calc(3 * var(--u)) rgba(128, 206, 255, 0.9); }
+
+.qnx-dial__pool {
+  position: absolute;
+  left: calc(5 * var(--u));
+  top: calc(5 * var(--u));
+  width: calc(320 * var(--u));
+  height: calc(320 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.6) 0 36%, rgba(0, 0, 0, 0) 100%);
+}
+.qnx-dial__dashlight {
+  position: absolute;
+  left: calc(18 * var(--u));
+  top: calc(18 * var(--u));
+  width: calc(294 * var(--u));
+  height: calc(294 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(88, 166, 255, var(--dash-a)) 0 30%,
+    rgba(107, 134, 255, calc(var(--dash-a) * 0.38)) 66%,
+    rgba(23, 28, 143, 0) 100%
+  );
+  transition: --dash-a 0.45s linear;
+}
+
+.qnx-dial__ring {
+  position: absolute;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--ring-1) 0%,
+    var(--light-blue) 25%,
+    var(--azure) 50%,
+    var(--light-blue) 75%,
+    var(--ring-1) 100%
+  );
+  opacity: var(--ring-a);
+  animation: spin var(--ring-spin) linear infinite;
+  transition: --ring-a 0.45s linear, --ring-w 0.45s linear;
+  will-change: transform;
+}
+.qnx-dial__ring--soft {
+  left: calc(94 * var(--u));
+  top: calc(94 * var(--u));
+  width: calc(142 * var(--u));
+  height: calc(142 * var(--u));
+  --ring-w: calc(13 * var(--u));
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - var(--ring-w)), #000 calc(100% - var(--ring-w)));
+  mask: radial-gradient(farthest-side, #0000 calc(100% - var(--ring-w)), #000 calc(100% - var(--ring-w)));
+  filter: blur(calc(12 * var(--u)));
+}
+.qnx-dial__ring--line {
+  left: calc(96 * var(--u));
+  top: calc(96 * var(--u));
+  width: calc(138 * var(--u));
+  height: calc(138 * var(--u));
+  --ring-w: calc(2.5 * var(--u));
+  -webkit-mask: radial-gradient(farthest-side, #0000 calc(100% - var(--ring-w)), #000 calc(100% - var(--ring-w)));
+  mask: radial-gradient(farthest-side, #0000 calc(100% - var(--ring-w)), #000 calc(100% - var(--ring-w)));
+  filter: blur(calc(2.5 * var(--u)));
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.qnx-dial__glass {
+  position: absolute;
+  left: calc(101 * var(--u));
+  top: calc(101 * var(--u));
+  width: calc(128 * var(--u));
+  height: calc(128 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(closest-side, #1c2236 0%, #0c0f1a 70%, #06070c 100%);
+  box-shadow:
+    0 calc(6 * var(--u)) calc(18 * var(--u)) rgba(0, 0, 0, 0.5),
+    inset 0 0 0 calc(1.2 * var(--u)) rgba(255, 255, 255, 0.26);
+  overflow: hidden;
+}
+.qnx-dial__innerlight {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    rgba(88, 166, 255, 0) 0 40%,
+    rgba(88, 166, 255, calc(0.18 * var(--lit))) 88%,
+    rgba(128, 206, 255, calc(0.55 * var(--lit))) 100%
+  );
+  --lit: 0;
+  transition: --lit 0.4s linear;
+}
+.qnx-dial__spec {
+  position: absolute;
+  left: calc(29 * var(--u));
+  top: calc(11 * var(--u));
+  width: calc(70 * var(--u));
+  height: calc(33 * var(--u));
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+}
+
+.qnx-dial__progress {
+  position: absolute;
+  left: calc(96 * var(--u));
+  top: calc(96 * var(--u));
+  width: calc(138 * var(--u));
+  height: calc(138 * var(--u));
+  transform: rotate(-90deg);
+  overflow: visible;
+  pointer-events: none;
+}
+.qnx-dial__progress circle {
+  fill: none;
+  stroke: #fff;
+  stroke-width: calc(3 * var(--u));
+  stroke-linecap: round;
+  stroke-dasharray: 414.7px;
+  stroke-dashoffset: calc(414.7px * (1 - var(--p)));
+  filter: drop-shadow(0 0 calc(6 * var(--u)) rgba(128, 206, 255, 0.9));
+  opacity: clamp(0, calc(var(--p) * 30), 1);
+}
+
+.qnx-dial__power {
+  position: absolute;
+  left: calc(153 * var(--u));
+  top: calc(150 * var(--u));
+  width: calc(26 * var(--u));
+  height: calc(26 * var(--u));
+  pointer-events: none;
+}
+.qnx-dial__power path {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  transition: stroke 0.35s linear;
+}
+.qnx-dial__label {
+  position: absolute;
+  left: 0;
+  top: calc(184 * var(--u));
+  z-index: 2;
+  width: 100%;
+  text-align: center;
+  font-size: calc(10 * var(--u));
+  line-height: calc(12.1 * var(--u));
+  font-weight: 600;
+  letter-spacing: calc(2.4 * var(--u));
+  color: #fff;
+  pointer-events: none;
+}
+
+/* holding (04.2) */
+.qnx-dialwrap[data-holding="1"] {
+  --ring-a: 0.79;
+  --ring-spin: 2s;
+  --dash-a: 0.44;
+}
+.qnx-dialwrap[data-holding="1"] .qnx-dial__ring--soft { --ring-w: calc(16.2 * var(--u)); filter: blur(calc(15 * var(--u))); }
+.qnx-dialwrap[data-holding="1"] .qnx-dial__ring--line { --ring-w: calc(3.4 * var(--u)); }
+.qnx-dialwrap[data-holding="1"] .qnx-dial__innerlight { --lit: 0.6; }
+.qnx-dialwrap[data-holding="1"] .qnx-dial__power path { stroke: #b0e1ff; }
+
+/* engine on (04.3) */
+.qnx-dialwrap[data-engine="1"] {
+  --ring-a: 1;
+  --ring-spin: 0.9s;
+  --dash-a: 0.63;
+}
+.qnx-dialwrap[data-engine="1"] .qnx-dial__ring--soft { --ring-w: calc(20 * var(--u)); filter: blur(calc(18 * var(--u))); }
+.qnx-dialwrap[data-engine="1"] .qnx-dial__ring--line { --ring-w: calc(4 * var(--u)); }
+.qnx-dialwrap[data-engine="1"] .qnx-dial__innerlight { --lit: 1; }
+.qnx-dialwrap[data-engine="1"] .qnx-dial__power path { stroke: #80ceff; }
+.qnx-dialwrap[data-engine="1"] .qnx-dial__flash { animation: engine-flash 0.6s var(--ease-cine); }
+.qnx-dial__flash {
+  position: absolute;
+  left: calc(71 * var(--u));
+  top: calc(71 * var(--u));
+  width: calc(188 * var(--u));
+  height: calc(188 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.85), rgba(128, 206, 255, 0) 70%);
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes engine-flash {
+  0% { opacity: 0; transform: scale(0.5); }
+  25% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+
+.qnx-dialhint {
+  position: absolute;
+  left: 0;
+  top: calc(266 * var(--u));
+  width: 100%;
+  text-align: center;
+  font-size: calc(14 * var(--u));
+  line-height: calc(17 * var(--u));
+  font-weight: 500;
+  color: #fff;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------ 04.4 orb --------- */
+.qnx-orb {
+  position: absolute;
+  left: calc(-40 * var(--u));
+  top: calc(527 * var(--u));
+  width: calc(520 * var(--u));
+  height: calc(520 * var(--u));
+  border-radius: 50%;
+  background: radial-gradient(
+    closest-side,
+    #fff 0%,
+    var(--light-blue) 30%,
+    var(--azure) 70%,
+    var(--navy) 100%
+  );
+  transform: translate3d(calc(165 * var(--u)), calc(-140 * var(--u)), 0) scale(0.09);
+  transform-origin: center;
+  opacity: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+.qnx-device[data-stage="launch"] .qnx-orb {
+  animation: orb-grow 1s var(--ease-cine) forwards;
+}
+@keyframes orb-grow {
+  0%   { opacity: 1; transform: translate3d(calc(165 * var(--u)), calc(-140 * var(--u)), 0) scale(0.09); }
+  18%  { opacity: 1; }
+  100% { opacity: 1; transform: translate3d(calc(-20 * var(--u)), calc(180 * var(--u)), 0) scale(3.4); }
+}
+
+/* -------------------------------------------------- chrome / a11y -------- */
+.qnx-chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+}
+.qnx-btn {
+  position: absolute;
+  pointer-events: auto;
+  font-family: var(--font);
+  font-size: calc(14 * var(--u));
+  font-weight: 600;
+  border: 0;
+  border-radius: 999px;
+  padding: calc(10 * var(--u)) calc(16 * var(--u));
+  min-height: calc(36 * var(--u));
+  cursor: pointer;
+  backdrop-filter: blur(calc(12 * var(--u))) saturate(1.4);
+  -webkit-backdrop-filter: blur(calc(12 * var(--u))) saturate(1.4);
+  transition: transform 0.18s var(--ease-smooth), opacity 0.3s linear, background 0.3s linear;
+}
+.qnx-btn:active { transform: scale(0.96); }
+.qnx-btn--skip {
+  right: calc(20 * var(--u));
+  top: calc(58 * var(--u));
+  background: rgba(255, 255, 255, 0.55);
+  color: #1c1c1e;
+  opacity: 0;
+}
+.qnx-device[data-stage="logo"] .qnx-btn--skip,
+.qnx-device[data-stage="carousel"] .qnx-btn--skip,
+.qnx-device[data-stage="card"] .qnx-btn--skip,
+.qnx-device[data-stage="story"] .qnx-btn--skip { opacity: 1; }
+
+.qnx-btn--replay {
+  right: calc(20 * var(--u));
+  top: calc(58 * var(--u));
+  background: rgba(20, 22, 34, 0.5);
+  color: #fff;
+  opacity: 0;
+}
+.qnx-device[data-stage="hold"] .qnx-btn--replay,
+.qnx-device[data-stage="engine"] .qnx-btn--replay { opacity: 1; }
+
+.qnx-sr {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* sign-in hand-off screen lives in signin.css-ish classes */
+.qnx-signin {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(90% 60% at 50% 0%, #ffffff 0%, #e9eeff 55%, #cfdcff 100%);
+  display: flex;
+  flex-direction: column;
+  padding: calc(64 * var(--u)) calc(28 * var(--u)) calc(28 * var(--u));
+  z-index: 80;
+  opacity: 0;
+  animation: copy-in 0.6s var(--ease-smooth) forwards;
+}
+.qnx-signin__mark {
+  width: calc(64 * var(--u));
+  height: calc(65 * var(--u));
+  background: url("../assets/logo.webp") center / contain no-repeat;
+  filter: drop-shadow(0 calc(6 * var(--u)) calc(18 * var(--u)) rgba(13, 17, 102, 0.2));
+  margin-bottom: calc(18 * var(--u));
+}
+.qnx-signin h2 {
+  margin: 0;
+  font-size: calc(27 * var(--u));
+  line-height: calc(33 * var(--u));
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--ink);
+}
+.qnx-signin p {
+  margin: calc(8 * var(--u)) 0 0;
+  font-size: calc(15 * var(--u));
+  line-height: calc(21 * var(--u));
+  color: var(--ink-soft);
+}
+.qnx-field {
+  margin-top: calc(22 * var(--u));
+}
+.qnx-field label {
+  display: block;
+  font-size: calc(12 * var(--u));
+  font-weight: 600;
+  letter-spacing: calc(0.8 * var(--u));
+  text-transform: uppercase;
+  color: #6b6b72;
+  margin-bottom: calc(8 * var(--u));
+}
+.qnx-field input {
+  width: 100%;
+  font-family: var(--font);
+  font-size: calc(16 * var(--u));
+  padding: calc(14 * var(--u)) calc(16 * var(--u));
+  border-radius: calc(14 * var(--u));
+  border: calc(1 * var(--u)) solid rgba(23, 28, 143, 0.12);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.2s linear, box-shadow 0.2s linear;
+}
+.qnx-field input:focus {
+  border-color: var(--azure);
+  box-shadow: 0 0 0 calc(3 * var(--u)) rgba(107, 134, 255, 0.18);
+}
+.qnx-cta {
+  margin-top: calc(28 * var(--u));
+  width: 100%;
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: calc(17 * var(--u));
+  font-weight: 600;
+  padding: calc(17 * var(--u));
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #6b86ff, #3f5fe0);
+  box-shadow: 0 calc(14 * var(--u)) calc(28 * var(--u)) rgba(23, 28, 143, 0.28);
+  transition: transform 0.18s var(--ease-smooth), filter 0.2s linear;
+}
+.qnx-cta:active { transform: scale(0.985); filter: brightness(1.05); }
+.qnx-signin__form { margin-top: calc(8 * var(--u)); }
+.qnx-signin .qnx-signin__error {
+  margin: calc(14 * var(--u)) 0 0;
+  font-size: calc(13 * var(--u));
+  line-height: calc(18 * var(--u));
+  color: #c0392b;
+  text-align: center;
+}
+.qnx-signin__error[hidden] { display: none; }
+.qnx-back {
+  margin-top: calc(14 * var(--u));
+  align-self: center;
+  border: 0;
+  background: none;
+  font-family: var(--font);
+  font-size: calc(13.5 * var(--u));
+  font-weight: 600;
+  color: var(--azure);
+  cursor: pointer;
+  padding: calc(8 * var(--u));
+}
+.qnx-signin .qnx-note {
+  margin-top: auto;
+  font-size: calc(12.5 * var(--u));
+  line-height: calc(17 * var(--u));
+  color: #75757d;
+  text-align: center;
+}
+
+/* ------------------------------------------- reduced motion ------------- */
+@media (prefers-reduced-motion: reduce) {
+  .qnx-device[data-stage="carousel"] .qnx-row[data-dir="left"],
+  .qnx-device[data-stage="carousel"] .qnx-row[data-dir="right"],
+  .qnx-photo[data-active="1"],
+  .qnx-dial__ring { animation: none !important; }
+  .qnx-card, .qnx-photo, .qnx-copy, .qnx-layer { transition: none !important; }
+  * { transition-duration: 0.001s !important; }
+}
